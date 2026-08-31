@@ -103,3 +103,68 @@
           ko reference hi rehne deta hai. Deep object isolation ke liye 
           `structuredClone()` mandatory hai.
    ========================================================================== */
+
+
+
+
+
+
+
+
+   /* ==========================================================================
+   📌 STEP 3: TASKQUEUE (CONCURRENCY LIMITER WITH PROMISES) - REVISION NOTES
+   ==========================================================================
+   Goal: Async operations ko queue mein hold karke max N parallel execution
+   limit (concurrency) enforce karna taaki backend server crash/overload na ho.
+   ========================================================================== */
+
+/**
+ * 🛠️ CORE JS CONCEPTS JO HUMNE SIKHE:
+ * 1. Deferred Promise Resolution: `push()` ke andar naya Promise bana kar
+ *    uske `resolve` aur `reject` handlers ko queue object mein capture karna.
+ * 2. FIFO Queue (First-In-First-Out): Array `.push()` (enqueue) aur `.shift()`
+ *    (dequeue) se execution order maintain rakhna.
+ * 3. Microtask Lifecycle (`.finally()`): Task success ho ya fail, slot free 
+ *    karna aur next task ko scheduling ke liye trigger karna.
+ * 4. Central Worker Pattern: Slot availability ke base par tasks release karna.
+ */
+
+/* ==========================================================================
+   🧠 METHODS KA DETAILED BREAKDOWN & LOGIC
+   ========================================================================== */
+
+// 1. constructor(concurrency = 2)
+// - Limit: `this.concurrency` (Ek saath max kitne tasks chal sakte hain).
+// - Counter: `this.running = 0` (Abhi active running tasks ki count).
+// - Queue: `this.queue = []` (Pending tasks objects `{ task, resolve, reject }`).
+
+// 2. push(task)
+// - Direct Call Roko: Function ko immediately execute nahi karte (`task()` nahi karte).
+// - Deferred Promise: Naya `Promise` return karke uske `{ task, resolve, reject }` 
+//   handlers ko `this.queue` array mein hold karte hain.
+// - Trigger Worker: Immediately `this.process()` call karte hain.
+
+// 3. process() - Central Worker Loop
+// - Condition Check: `while (this.running < this.concurrency && this.queue.length > 0)`
+// - Dequeue: `this.queue.shift()` se front task object nikaalte hain.
+// - Counter Increment: `this.running++` (Slot occupy hua).
+// - Execution & Cleanup:
+//     - `task()` execute karte hain.
+//     - `.then(resolve)` / `.catch(reject)` se original caller ko result/error dete hain.
+//     - `.finally()` mein `this.running--` (slot khali) aur dobara `this.process()` 
+//       call karke next pending task ko start karte hain.
+
+/* ==========================================================================
+   ⚡ INTERVIEW TRAPS & EDGE CASES
+   ==========================================================================
+   ❓ Q1: `push()` karte waqt task turant execute kyun ho jata hai agar galti se
+          `task()` likh dein?
+   💡 Ans: `task` ek function reference (`() => Promise`) hona chahiye. Agar `task()` 
+          pass karenge toh function turant execute ho jayega aur `push()` limit 
+          enforce hi nahi kar payega.
+
+   ❓ Q2: Task reject/fail hone par `finally()` na lagayein toh kya hoga?
+   💡 Ans: Agar koi async task crash hoga, toh `this.running--` decrement nahi 
+          hoga. Slot permanently block ho jayega aur baki ke queued tasks hamesha 
+          ke liye hang (unprocessed) reh jayenge.
+   ========================================================================== */
