@@ -4,18 +4,15 @@ import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { AuthModule } from './auth/auth.module.js';
 import { UserModule } from './user/user.module.js';
+import { MongooseModule } from '@nestjs/mongoose';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
 @Module({
   imports: [
-    ObserveModule.forRoot({
-      appKey: 'YOUR_APP_KEY',
-      appSecret: 'YOUR_APP_SECRET',
-      serviceId: 'api-learn',
-    }),
     AuthModule,
     UserModule,
+    MongooseModule.forRoot(process.env.MONGODB_URL as string)
   ],
   controllers: [AppController],
   providers: [AppService],
