@@ -5,6 +5,8 @@ import { AppService } from './app.service.js';
 import { AuthModule } from './auth/auth.module.js';
 import { UserModule } from './user/user.module.js';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import * as path from 'path';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -12,7 +14,15 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
   imports: [
     AuthModule,
     UserModule,
-    MongooseModule.forRoot(process.env.MONGODB_URL as string)
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+     useFactory: (configService: ConfigService) => ({
+        uri: configService.get<string>('MONGO_URI')}),
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],

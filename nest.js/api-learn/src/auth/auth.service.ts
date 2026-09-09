@@ -14,6 +14,10 @@ export class AuthService {
         // 2. Hash the password 
         // 3. Store the user in DB`
         // 4. Generate JWT Token
-        return this.userService.createUser({...registerUserdto , password:hash})
+        const user = await this.userService.createUser({...registerUserdto , password:hash})
+        return {
+            message:"User created",
+            user
+        }
     }
 }

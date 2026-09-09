@@ -10,9 +10,9 @@ export class AuthController {
     
     // routes bana rahe hai for register
     @Post('register')
-        register(@Body() registerUserdto:RegisterUserDto){
+        async register(@Body() registerUserdto:RegisterUserDto){
             // service se register ka logic/function use kar rahe hai
-           const response =  this.authService.registerUser(registerUserdto);
-           return response;
+           const createdUser =  await this.authService.registerUser(registerUserdto);
+           return createdUser;
         }
 }
