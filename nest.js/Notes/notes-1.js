@@ -13,3 +13,6 @@
 //! Q4. What is DTO in nest js ? (Data transfer object)
 // ans. DTO ek object hai jo incoming request ke shape/schema ko define karta hai 
 // NestJS me Classes use karte hain na ki Interfaces, kyunki Interfaces compile time ke baad remove ho jaate hain
+
+//! Q5. What is Validation Pipe in nest js ?
+// ans. ValidationPipe ek class hai jo incoming request ke shape/schema ko validate karta hai 
